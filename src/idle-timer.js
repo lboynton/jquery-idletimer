@@ -94,6 +94,33 @@ $.idleTimer = function( firstParam, elem, opts ) {
 
 			//detach the event handlers
 			jqElem.off(".idleTimer");
+		},
+
+		/**
+		 * Resets the idle timer, by clearing any existing timeouts whilst
+		 * keeping the event handlers. If the user was idle, they are set
+		 * as being active again.
+		 * @return {void}
+		 * @method reset
+		 * @static
+		 */
+		reset = function( jqElem ) {
+
+			var obj = jqElem.data("idleTimerObj") || {};
+
+			//clear any existing timeout
+			clearTimeout( obj.tId );
+
+			//if the idle timer is enabled
+			if ( obj.enabled ){
+				//if it's idle, that means the user is no longer idle
+				if ( obj.idle ){
+					toggleIdleState( this );
+				}
+			}
+
+			//set a new timeout
+			obj.tId = setTimeout( toggleIdleState, obj.timeout );
 		};
 
 	obj.olddate = obj.olddate || +new Date();
@@ -102,6 +129,9 @@ $.idleTimer = function( firstParam, elem, opts ) {
 		opts.timeout = firstParam;
 	} else if ( firstParam === "destroy" ) {
 		stop( jqElem );
+		return this;
+	} else if ( firstParam === "reset" ) {
+		reset( jqElem );
 		return this;
 	} else if ( firstParam === "getElapsedTime" ) {
 		return ( +new Date() ) - obj.olddate;
